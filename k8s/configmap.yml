@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3-config
+data:
+  bucket: your-s3-bucket
+  processor_image: your-repo/processor-service:latest

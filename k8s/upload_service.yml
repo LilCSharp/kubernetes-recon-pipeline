@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upload-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upload
+  template:
+    metadata:
+      labels:
+        app: upload
+    spec:
+      serviceAccountName: uploader
+      containers:
+      - name: upload
+        image: your-repo/upload-service:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: s3-config
+              key: bucket
+        - name: PROCESSOR_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: s3-config
+              key: processor_image
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upload-service
+spec:
+  selector:
+    app: upload
+  ports:
+    - port: 80
+      targetPort: 8000
