@@ -1,29 +1,50 @@
-version: "3.8"
-
 services:
-  minio:
-    image: minio/minio
+  ceph:
+    image: ceph/ceph:v17
+    container_name: ceph
+    environment:
+      - MON_IP=127.0.0.1
+      - CEPH_PUBLIC_NETWORK=0.0.0.0/0
+    command: >
+      bash -c "
+        cephadm bootstrap --mon-ip=127.0.0.1 &&
+        ceph config set global rgw_frontends 'civetweb port=9000' &&
+        ceph orch apply rgw default default &&
+        ceph auth get-or-create client.admin mon 'allow *' osd 'allow *' mgr 'allow *' &&
+        radosgw-admin user create --uid=admin --display-name='Admin User' \
+          --access-key=cephadmin --secret=cephadmin --system
+        && sleep infinity"
     ports:
       - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ./minio-data:/data
-    command: server /data --console-address ":9001"
+      - ./ceph-data:/var/lib/ceph
+    privileged: true
 
   processor:
     build: ./processor_service
     runtime: nvidia
     environment:
-      S3_ENDPOINT: http://minio:9000
-      AWS_ACCESS_KEY_ID: minioadmin
-      AWS_SECRET_ACCESS_KEY: minioadmin
+      S3_ENDPOINT: http://ceph:9000
+      AWS_ACCESS_KEY_ID: cephadmin
+      AWS_SECRET_ACCESS_KEY: cephadmin
       S3_BUCKET: my-bucket
       ZIP_KEY: uploads/test.zip
       OUTPUT_PREFIX: results/
     depends_on:
-      - minio
+      - ceph
     volumes:
       - ./checkpoints:/workspace/ml-matrix3d/checkpoints
+
+  provider-service:
+    build: ./provider_service
+    environment:
+      STORAGE_BACKEND: selfhosted
+      CEPH_ENDPOINT: http://ceph:9000
+      CEPH_REGION: us-east-1
+      CEPH_ACCESS_KEY: cephadmin
+      CEPH_SECRET_KEY: cephadmin
+      CEPH_BUCKET: my-bucket
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ceph

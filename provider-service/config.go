@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"provider_service/storage" // Replace with your actual module path
+	"provider-service/storage" // Replace with your actual module path
 )
 
 func setupStorage() storage.ObjectStorage {

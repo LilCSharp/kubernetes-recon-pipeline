@@ -1,4 +1,4 @@
-module provider_service
+module provider-service
 
 go 1.23.0
 
