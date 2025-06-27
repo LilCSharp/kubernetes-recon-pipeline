@@ -37,6 +37,9 @@ WORKDIR /workspace
 RUN git clone --branch main --single-branch https://github.com/apple/ml-matrix3d.git
 WORKDIR /workspace/ml-matrix3d
 
+ENV TORCH_CUDA_ARCH_LIST="8.9"
+ENV TCNN_CUDA_ARCHITECTURES="86"
+
 # Install CUDA + Torch dependencies
 RUN pip install torch==2.4.0 torchvision==0.19.0 xformers==0.0.27.post2 --index-url https://download.pytorch.org/whl/cu118 && \
     pip install --extra-index-url https://miropsota.github.io/torch_packages_builder pytorch3d==0.7.7+pt2.4.0cu118 && \
