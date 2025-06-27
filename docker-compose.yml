@@ -24,12 +24,12 @@ services:
     build: ./processor_service
     runtime: nvidia
     environment:
-      S3_ENDPOINT: http://ceph:9000
-      AWS_ACCESS_KEY_ID: cephadmin
-      AWS_SECRET_ACCESS_KEY: cephadmin
-      S3_BUCKET: my-bucket
-      ZIP_KEY: uploads/test.zip
-      OUTPUT_PREFIX: results/
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      ZIP_KEY: ${ZIP_KEY}
+      OUTPUT_PREFIX: ${OUTPUT_PREFIX}
     depends_on:
       - ceph
     volumes:
@@ -38,12 +38,11 @@ services:
   provider-service:
     build: ./provider_service
     environment:
-      STORAGE_BACKEND: selfhosted
-      CEPH_ENDPOINT: http://ceph:9000
-      CEPH_REGION: us-east-1
-      CEPH_ACCESS_KEY: cephadmin
-      CEPH_SECRET_KEY: cephadmin
-      CEPH_BUCKET: my-bucket
+      STORAGE_BACKEND: ${STORAGE_BACKEND}
+      CEPH_ENDPOINT: ${CEPH_ENDPOINT}
+      CEPH_REGION: ${CEPH_REGION}
+      CEPH_ACCESS_KEY: ${CEPH_ACCESS_KEY}
+      CEPH_SECRET_KEY: ${CEPH_SECRET_KEY}
     ports:
       - "8080:8080"
     depends_on:
